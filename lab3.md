@@ -125,9 +125,12 @@ Pizza Finder to aplikacja webowa umożliwiająca użytkownikom wyszukiwanie i po
 ```mermaid
 flowchart TD
     subgraph Frontend
-        UI[Interfejs użytkownika] --> PizzaSelector[Komponent wyboru składników]
+        UI[Interfejs użytkownika] --> LoginComponent[Komponent logowania]
+        LoginComponent --> PizzaSelector[Komponent wyboru składników]
         PizzaSelector --> ResultsList[Lista wyników]
         ResultsList --> RestaurantDetails[Szczegóły restauracji]
+        RestaurantDetails --> FavoritesComponent[Komponent ulubionych]
+        FavoritesComponent --> SaveFavorite[Zapisz do ulubionych]
     end
 
     subgraph Backend Services
@@ -150,14 +153,9 @@ flowchart TD
 
       subgraph Integration Layer
          IntegrationService --> PyszneAdapter[Adapter Pyszne.pl]
-         IntegrationService --> GloveAdapter[Adapter Glovo]
-         IntegrationService --> BoltAdapter[Adapter Bolt Food]
-         IntegrationService --> UberAdapter[Adapter Uber Eats]
          
          PyszneAdapter --> PyszneAPI[API Pyszne.pl]
-         GloveAdapter --> GlovoAPI[API Glovo]
-         BoltAdapter --> BoltAPI[API Bolt Food]
-         UberAdapter --> UberAPI[API Uber Eats]
+
       end
 
       subgraph Database Layer
@@ -336,6 +334,62 @@ flowchart TD
 - Automatyczne wykrywanie problemów
 - Integracja z systemem alertów
 
+
+
+# Diagram przypadków użycia
+
+
+   ```mermaid  
+   flowchart LR
+      subgraph Actors
+         Anonymous[/Użytkownik Anonimowy/]
+         User[/Użytkownik Zarejestrowany/]
+         Admin[/Administrator/]
+      end
+
+      subgraph Pizza Finder System
+         Register(Utworzenie konta)
+
+         SearchPizza[Wyszukiwanie pizzy]
+         FilterResults(Filtrowanie wyników)
+         SortResults(Sortowanie wyników)
+         ViewDetails(Przeglądanie szczegółów)
+
+         EditProfile(Edycja profilu)
+         ManageFavorites(Zarządzanie ulubionymi)
+         ManagePreferences(Zarządzanie preferencjami)
+         ViewHistory(Przeglądanie historii)
+
+         Login(Logowanie)
+         ManageSystem[Zarządzanie systemem]
+         MonitorPerformance[Monitoring wydajności]
+         ManageUsers[Zarządzanie użytkownikami]
+      end
+
+      %% Anonymous User connections
+      Anonymous --> SearchPizza
+      Anonymous --> FilterResults
+      Anonymous --> SortResults
+      Anonymous --> ViewDetails
+      Anonymous --> Register
+
+      %% User connections
+      User --> Login
+      User --> EditProfile
+      User --> ManagePreferences
+      User --> SearchPizza
+      User --> FilterResults
+      User --> SortResults
+      User --> ViewDetails
+      User --> ManageFavorites
+      User --> ViewHistory
+
+      %% Admin connections
+      Admin --> ManageSystem
+      Admin --> MonitorPerformance
+      Admin --> ManageUsers
+      Admin --> Login
+   ```
 
 
 
