@@ -32,7 +32,7 @@ Pizza Finder to aplikacja webowa umożliwiająca użytkownikom wyszukiwanie i po
 1. Wyszukiwanie i filtrowanie
    - System umożliwia wyszukiwanie pizzy po nazwie
    - System pozwala na filtrowanie wyników po składnikach
-   - System umożliwia sortowanie wyników po ilości składników, cenie i czasie dostawy
+   - System umożliwia sortowanie wyników po ilości skadników, cenie i czasie dostawy
    - System wyświetla szczegółowe informacje o każdej pizzy
 
 2. Zarządzanie kontem użytkownika
@@ -120,6 +120,8 @@ Pizza Finder to aplikacja webowa umożliwiająca użytkownikom wyszukiwanie i po
 
 
 # Architektura
+
+
 ```mermaid
 flowchart TD
     subgraph Frontend
@@ -130,29 +132,56 @@ flowchart TD
 
     subgraph Backend Services
         APIGateway[API Gateway] --> PizzaService[Serwis Pizzy]
+        APIGateway --> UserService[Serwis Użytkownika]
+        APIGateway --> FavoritesService[Serwis Ulubionych]
         PizzaService --> RestaurantService[Serwis Restauracji]
         RestaurantService --> SearchService[Serwis Wyszukiwania]
         
         SearchService --> DataValidator[Walidator danych]
-        DataValidator --> PyszneAdapter[Adapter Pyszne.pl]
+        DataValidator --> IntegrationService[Serwis Integracji]
     end
 
-    subgraph Data Layer
-        PyszneAdapter --> PyszneAPI[API Pyszne.pl]
-        SearchService --> Cache[Redis Cache]
-        SearchService --> Database[(Baza danych)]
+   subgraph Data Layer
+   
+               subgraph Cache Strategy
+               Cache --> L1Cache[L1 - Aplikacyjny]
+               Cache --> L2Cache[L2 - Distributed]
+         end
+
+      subgraph Integration Layer
+         IntegrationService --> PyszneAdapter[Adapter Pyszne.pl]
+         IntegrationService --> GloveAdapter[Adapter Glovo]
+         IntegrationService --> BoltAdapter[Adapter Bolt Food]
+         IntegrationService --> UberAdapter[Adapter Uber Eats]
+         
+         PyszneAdapter --> PyszneAPI[API Pyszne.pl]
+         GloveAdapter --> GlovoAPI[API Glovo]
+         BoltAdapter --> BoltAPI[API Bolt Food]
+         UberAdapter --> UberAPI[API Uber Eats]
+      end
+
+      subgraph Database Layer
+         SearchService --> Cache[Redis Cache]
+         SearchService --> Database[(Baza danych)]
+         UserService --> Database
+         FavoritesService --> Database
+         
+
+      end
     end
 
     subgraph Common
         AuthService[Serwis Autoryzacji]
         ErrorHandler[Obsługa błędów]
         Logger[System logowania]
+        Monitoring[System monitoringu]
     end
 
     UI -->|HTTP/REST| APIGateway
     AuthService --> APIGateway
     ErrorHandler --> APIGateway
     Logger --> APIGateway
+    Monitoring --> APIGateway
 ```
 ## Common
 
@@ -171,11 +200,11 @@ flowchart TD
 - Zbiera informacje o działaniu systemu
 - Pomaga w debugowaniu i monitorowaniu
 
-#### Charakterystyka komponentów wspólnych:
-- Są używane przez wiele różnych części systemu
-- Zapewniają przekrojową funkcjonalność (cross-cutting concerns)
-- Centralizują ważne aspekty bezpieczeństwa i monitorowania
-- Wszystkie komunikują się z API Gateway, który jest głównym punktem wejścia do backend'u
+### Monitoring (System monitoringu)
+- Zbiera metryki wydajnościowe
+- Generuje alerty i raporty
+- Pomaga w monitorowaniu stanu systemu
+
 
 
 ## Frontend
@@ -220,14 +249,43 @@ flowchart TD
 - Sprawdza poprawność danych
 - Współpracuje z adapterem Pyszne.pl
 
-### PyszneAdapter (Adapter Pyszne.pl)
-- Dostosowuje komunikację z zewnętrznym API Pyszne.pl
+### IntegrationService (Serwis Integracji)
+- Zarządza komunikacją z różnymi dostawcami
+- Implementuje wzorzec fasady dla wszystkich integracji
+- Obsługuje równoległe zapytania do wielu dostawców
+- Agreguje i normalizuje wyniki
+- Implementuje strategie fallback i circuit breaker
+
+### Strategia obsługi błędów
+- Jeśli jeden z dostawców jest niedostępny, system kontynuuje działanie z pozostałymi
+- Implementacja circuit breaker zapobiega przeciążeniu niesprawnych API
+- Cachowanie pozwala na dostarczenie podstawowych danych nawet przy awarii dostawcy
+
+### UserService (Serwis Użytkownika)
+- Zarządza logiką związaną z użytkownikami
+- Komunikuje się z bazą danych
+
+### FavoritesService (Serwis Ulubionych)
+- Zarządza logiką związaną z ulubionymi pizzami
+- Komunikuje się z bazą danych
+
+### IntegrationService (Serwis Integracji)
+- Zarządza komunikacją z różnymi dostawcami
+- Implementuje wzorzec fasady dla wszystkich integracji
+- Obsługuje równoległe zapytania do wielu dostawców
+- Agreguje i normalizuje wyniki
+- Implementuje strategie fallback i circuit breaker
 
 
 ## Data Layer
 
-### PyszneAPI (API Pyszne.pl)
-- Zewnętrzne API dostarczające dane o restauracjach i pizzach
+### Integration Layer
+- Zarządza komunikacją z różnymi dostawcami
+- Implementuje wzorzec fasady dla wszystkich integracji
+- Obsługuje równoległe zapytania do wielu dostawców
+- Agreguje i normalizuje wyniki
+- Implementuje strategie fallback i circuit breaker
+
 
 ### Cache (Redis Cache)
 - Przechowuje popularne wyniki wyszukiwania
@@ -236,6 +294,47 @@ flowchart TD
 ### Database (Baza danych)
 - Przechowuje trwałe dane aplikacji
 - Obsługiwana przez PostgreSQL
+
+
+### Cache Strategy (Strategia cachowania)
+#### L1 Cache (Cache aplikacyjny)
+- Lokalny cache w pamięci aplikacji
+- Najszybszy dostęp do danych
+- Przechowuje często używane dane
+- Automatyczne czyszczenie po określonym czasie
+
+#### L2 Cache (Cache rozproszony)
+- Implementowany przez Redis
+- Współdzielony między instancjami
+- Przechowuje większe zestawy danych
+- Zaawansowane strategie invalidacji
+
+## Monitoring
+  
+### System monitoringu
+- Zbieranie metryk wydajnościowych
+- Monitorowanie SLA
+- Alerty przy przekroczeniu progów
+- Dashboardy z metrykami w czasie rzeczywistym
+
+#### Monitorowane metryki
+- Czas odpowiedzi API
+- Wykorzystanie zasobów
+- Liczba równoczesnych użytkowników
+- Cache hit ratio
+- Błędy i wyjątki
+- Dostępność usług
+
+#### Alerty
+- Przekroczenie czasu odpowiedzi (>2s)
+- Wysoki poziom błędów
+- Problemy z dostępnością
+- Przeciążenie systemu
+
+#### Health Checks
+- Regularne sprawdzanie stanu usług
+- Automatyczne wykrywanie problemów
+- Integracja z systemem alertów
 
 
 
