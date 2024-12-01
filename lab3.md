@@ -392,4 +392,155 @@ flowchart TD
    ```
 
 
+# Diagramy stanu
+## System logowania
+```mermaid
+   stateDiagram-v2
+    [*] --> Anonimowy
+    Anonimowy --> Rejestracja : Rejestracja konta
+    Anonimowy --> Logowanie : Logowanie
+    Logowanie --> Anonimowy : Powrót do stanu anonimowego
+    Rejestracja --> Logowanie : Logowanie
+    Logowanie --> Zalogowany : Zalogowanie udane
+    Zalogowany --> Wylogowanie : Wylogowanie
+    Wylogowanie --> Anonimowy : Powrót do stanu anonimowego
+    Zalogowany --> [*] : Zakończenie
+```
 
+## System wyboru pizzy
+```mermaid
+stateDiagram-v2
+    [*] --> PrzeglądaniePizzy
+    PrzeglądaniePizzy --> Wyszukiwanie : Wyszukiwanie pizzy
+    Wyszukiwanie --> Filtrowanie : Filtrowanie wyników
+    Filtrowanie --> Sortowanie : Sortowanie wyników
+    Sortowanie --> Szczegóły : Przeglądanie szczegółów pizzy
+    Szczegóły --> Ulubione : Dodaj do ulubionych
+    Ulubione --> PrzeglądaniePizzy : Powrót do wyników
+    Szczegóły --> [*] : Powrót do głównego ekranu
+```
+
+## System ulubionych
+```mermaid
+stateDiagram-v2
+    [*] --> BrakUlubionych
+    BrakUlubionych --> UlubionePizze : Dodaj pizzę do ulubionych
+    UlubionePizze --> Usuwanie : Usuwanie z ulubionych
+    Usuwanie --> BrakUlubionych : Brak ulubionych
+    UlubionePizze --> [*] : Zakończenie
+```
+
+
+# Diagramy sekwencji
+
+## Logowanie użytkownika
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI
+    participant APIGateway
+    participant AuthService
+    participant Database
+
+    User->>UI: Enter login details (email, password)
+    UI->>APIGateway: Send login request (email, password)
+    
+    alt If no internet connection
+        APIGateway-->>UI: Show error message (no internet connection)
+        UI-->>User: Display error (no internet connection)
+
+    end
+
+    APIGateway->>AuthService: Validate login credentials
+    
+    alt If input is incomplete or invalid
+        AuthService-->>APIGateway: Return error (missing fields)
+        APIGateway-->>UI: Show error message (invalid input)
+        UI->>User: Display error (missing email or password)
+    end
+    
+    APIGateway->>AuthService: Fetch user by email
+    alt If Database is unavailable
+        AuthService-->>APIGateway: Return error (Database connection failed)
+        APIGateway-->>UI: Show error message (database failure)
+        UI->>User: Display error (please try again later)
+    end
+    
+    Database-->>AuthService: Return user data
+    
+    alt If user does not exist
+        AuthService-->>APIGateway: Return error (user not found)
+        APIGateway-->>UI: Show error message (user not found)
+        UI->>User: Display error (user does not exist)
+    end
+    
+    AuthService->>AuthService: Verify password
+    
+    alt If credentials are invalid
+        AuthService-->>APIGateway: Return error (invalid credentials)
+        APIGateway-->>UI: Show login error message
+        UI->>User: Display login error (incorrect email or password)
+    end
+    
+    AuthService->>AuthService: Generate JWT Token
+    
+    alt If JWT token generation fails
+        AuthService-->>APIGateway: Return error (JWT generation failed)
+        APIGateway-->>UI: Show error message (please try again)
+        UI->>User: Display error (unable to log in, please try again later)
+    end
+    
+    AuthService-->>APIGateway: Return JWT Token (authentication success)
+    APIGateway-->>UI: Send JWT Token (authentication success)
+    UI->>User: Show logged in state
+
+```
+
+##  Wyszukanie pizzy
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI
+    participant APIGateway
+    participant AuthService
+    participant PizzaService
+
+
+    User->>UI: Search for pizza
+    UI->>APIGateway: Send search request (pizza name, filters)
+    APIGateway->>PizzaService: Fetch pizza details
+    PizzaService->>PizzaService: Search pizzas in DB
+    PizzaService-->>APIGateway: Return list of pizzas
+    APIGateway-->>UI: Send search results
+    UI->>User: Display pizza results
+```
+
+
+# Diagram czynności
+
+```mermaid
+stateDiagram-v2
+    [*] --> SearchingForPizza
+
+    SearchingForPizza --> PizzasFound : Search successful
+    SearchingForPizza --> NoPizzasFound : No results found
+
+    PizzasFound --> Filtering : User selects ingredients filter
+    Filtering --> FilteringResults : Filter applied
+    Filtering --> PizzasFound : User cancels filter
+
+    PizzasFound --> Sorting : User selects sorting criteria
+    Sorting --> SortedResults : Sorting applied
+    Sorting --> PizzasFound : User cancels sorting
+
+    PizzasFound --> DisplayingDetails : User selects pizza
+    Sorting --> DisplayingDetails : User selects pizza after sorting
+    Filtering --> DisplayingDetails : User selects pizza after filtering
+    DisplayingDetails --> [*] : Pizza details viewed
+
+    NoPizzasFound --> [*] : No action
+
+
+
+```
