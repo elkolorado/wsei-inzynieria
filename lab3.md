@@ -544,3 +544,158 @@ stateDiagram-v2
 
 
 ```
+
+
+# Diagram klas dla osoby nietechnicznej
+
+
+```mermaid
+---
+  config:
+    class:
+      hideEmptyMembersBox: true
+---
+
+classDiagram
+
+    class Annonymous {
+
+    }
+
+
+
+
+    class User {
+        + name
+        + email
+        - password
+        + favorite pizzas
+    }
+
+    class API_Pyszne {
+    }
+    class Pizza {
+        + name
+        + ingredients
+        + price
+        + description
+        + rating
+        + delivery time
+        + restaurant
+    }
+
+    class Restaurant {
+        + name
+        + location
+        + menu
+        + rating
+        + delivery time
+    }
+
+    class Administrator {
+        + name
+        + email
+        - password
+    }
+
+
+
+    Restaurant --> Pizza : menu
+    Annonymous --> User : can create
+    API_Pyszne --> Restaurant : sends data about
+    User <|-- Administrator : can delete 
+    User --> Pizza : search/manage favorites
+    Annonymous --> Pizza : search
+```
+
+#
+#
+#
+#
+
+```mermaid
+classDiagram
+    class User {
+        +String id
+        +String name
+        +String email
+        -String password
+        +List~Pizza~ favorites
+        +searchPizzas(String query)
+        +filterPizzas(Map~String, String~ filters)
+        +sortPizzas(String criteria)
+        +getPizzaDetails(String pizzaId)
+        +addToFavorites(Pizza pizza)
+        +removeFromFavorites(Pizza pizza)
+    }
+
+    class Pizza {
+        +String id
+        +String name
+        +List~String~ ingredients
+        +double price
+        +String restaurantId
+        +String description
+        +double rating
+        +int deliveryTime
+    }
+
+    class Restaurant {
+        +String id
+        +String name
+        +String location
+        +List~Pizza~ menu
+        +double rating
+        +int deliveryTime
+        +getMenu()
+        +getDetails()
+    }
+
+    class AuthService {
+        +String generateToken(User user)
+        +boolean validateToken(String token)
+        +User authenticate(String email, String password)
+    }
+
+    class PizzaService {
+        +List~Pizza~ searchPizzas(String query)
+        +List~Pizza~ filterPizzas(Map~String, String~ filters)
+        +List~Pizza~ sortPizzas(String criteria)
+        +Pizza getPizzaDetails(String pizzaId)
+    }
+
+    class UserService {
+        +User createUser(String name, String email, String password)
+        +User getUser(String id)
+        +User updateUser(String id, Map~String, String~ updates)
+        +boolean deleteUser(String id)
+    }
+
+    class FavoritesService {
+        +List~Pizza~ getFavorites(String userId)
+        +boolean addToFavorites(String userId, Pizza pizza)
+        +boolean removeFromFavorites(String userId, Pizza pizza)
+    }
+
+    class Administrator {
+        +String id
+        +String name
+        +String email
+        -String password
+        +manageUsers()
+        +manageRestaurants()
+    }
+
+    User <|-- Administrator
+
+    User --> PizzaService : uses
+    User --> FavoritesService : uses
+    User --> AuthService : uses
+    PizzaService --> Pizza : manages
+    Restaurant --> Pizza : contains
+    UserService --> User : manages
+    FavoritesService --> Pizza : manages
+    AuthService --> User : authenticates
+    Administrator --> UserService : manages
+    Administrator --> Restaurant : manages
+```
