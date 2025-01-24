@@ -1,6 +1,10 @@
 # Pizza Finder 
 
-# Opis projektu
+## Dane autora
+- Filip Zieliński
+- Numer indeksu: 14399
+
+## Cel projektu
 
 Pizza Finder to aplikacja webowa umożliwiająca użytkownikom wyszukiwanie i porównywanie ofert pizzy z różnych restauracji. Głównym celem jest ułatwienie procesu wyboru pizzy poprzez zaawansowane filtrowanie i sortowanie wyników.
 
@@ -22,7 +26,7 @@ Pizza Finder to aplikacja webowa umożliwiająca użytkownikom wyszukiwanie i po
 - Szybki dostęp do ulubionych pozycji
 
 ## Grupa docelowa
-- Studenci i młodzi profesjonaliści
+- Studenci i młodzi
 - Rodziny zamawiające pizzę do domu
 - Osoby poszukujące najlepszych ofert
 - Miłośnicy pizzy szukający nowych smaków
@@ -71,8 +75,6 @@ Pizza Finder to aplikacja webowa umożliwiająca użytkownikom wyszukiwanie i po
    - Elastyczna architektura pozwalająca na rozbudowę
    - Możliwość obsługi wzrostu ruchu
    - Modułowa struktura kodu
-
-
 
 
 # Specyfikacja techniczna
