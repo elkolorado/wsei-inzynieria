@@ -659,7 +659,6 @@ classDiagram
     }
 
     class UserService {
-        +User createUser(String name, String email, String password)
         +User getUser(String id)
         +User updateUser(String id, Map~String, String~ updates)
         +boolean deleteUser(String id)
