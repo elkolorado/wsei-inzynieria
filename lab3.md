@@ -506,30 +506,38 @@ sequenceDiagram
 # Diagram czynności
 
 ```mermaid
-stateDiagram-v2
-    [*] --> SearchingForPizza
-
-    SearchingForPizza --> PizzasFound : Search successful
-    SearchingForPizza --> NoPizzasFound : No results found
-
-    PizzasFound --> Filtering : User selects ingredients filter
-    Filtering --> FilteringResults : Filter applied
-    Filtering --> PizzasFound : User cancels filter
-
-    PizzasFound --> Sorting : User selects sorting criteria
-    Sorting --> SortedResults : Sorting applied
-    Sorting --> PizzasFound : User cancels sorting
-
-    PizzasFound --> DisplayingDetails : User selects pizza
-    Sorting --> DisplayingDetails : User selects pizza after sorting
-    Filtering --> DisplayingDetails : User selects pizza after filtering
-    DisplayingDetails --> [*] : Pizza details viewed
-
-    NoPizzasFound --> [*] : No action
-
-
-
+graph TD
+    Start((Start)) --> B[Searching for Pizza]
+    B -->|Search successful| C[Pizzas Found]
+    B -->|No results found| D[No Pizzas Found]
+    C --> E[User selects ingredients filter]
+    E --> C[Filter applied]
+    C --> F[User selects sorting criteria]
+    F --> C[Sorting applied]
+    C --> G[User selects pizza]
+    G --> H[Pizza details viewed]
+    H --> End((End))
+    D --> End((End))
 ```
+
+## Diagram czynności - Zarządzanie ulubionymi pizzami
+
+```mermaid
+graph TD
+    Start((Start)) --> A[User logs in]
+    A --> B[User navigates to favorites]
+    B --> C[View list of favorite pizzas]
+    C --> D[User selects a pizza to remove]
+    D --> E[Remove pizza from favorites]
+    E --> C
+    C --> F[User adds a new pizza to favorites]
+    F --> G[Search for pizza]
+    G --> H[Select pizza from search results]
+    H --> I[Add pizza to favorites]
+    I --> C
+    C --> End((End))
+```
+
 
 
 # Diagram klas dla osoby nietechnicznej
