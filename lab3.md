@@ -120,9 +120,7 @@ Pizza Finder to aplikacja webowa umożliwiająca użytkownikom wyszukiwanie i po
 - User Analytics
 
 
-
 # Architektura
-
 
 ```mermaid
 flowchart TD
@@ -146,28 +144,23 @@ flowchart TD
         DataValidator --> IntegrationService[Serwis Integracji]
     end
 
-   subgraph Data Layer
-   
-               subgraph Cache Strategy
-               Cache --> L1Cache[L1 - Aplikacyjny]
-               Cache --> L2Cache[L2 - Distributed]
-         end
+    subgraph Data Layer
+        subgraph Cache Strategy
+            Cache --> L1Cache[L1 - Aplikacyjny]
+            Cache --> L2Cache[L2 - Distributed]
+        end
 
-      subgraph Integration Layer
-         IntegrationService --> PyszneAdapter[Adapter Pyszne.pl]
-         
-         PyszneAdapter --> PyszneAPI[API Pyszne.pl]
+        subgraph Integration Layer
+            IntegrationService --> PyszneAdapter[Adapter Pyszne.pl]
+            PyszneAdapter --> PyszneAPI[API Pyszne.pl]
+        end
 
-      end
-
-      subgraph Database Layer
-         SearchService --> Cache[Redis Cache]
-         SearchService --> Database[(Baza danych)]
-         UserService --> Database
-         FavoritesService --> Database
-         
-
-      end
+        subgraph Database Layer
+            SearchService --> Cache[Redis Cache]
+            SearchService --> Database[(Baza danych)]
+            UserService --> Database
+            FavoritesService --> Database
+        end
     end
 
     subgraph Common
@@ -183,6 +176,7 @@ flowchart TD
     Logger --> APIGateway
     Monitoring --> APIGateway
 ```
+
 ## Common
 
 ### AuthService (Serwis Autoryzacji)
@@ -205,13 +199,14 @@ flowchart TD
 - Generuje alerty i raporty
 - Pomaga w monitorowaniu stanu systemu
 
-
-
 ## Frontend
 
 ### UI (Interfejs użytkownika)
 - Główny komponent odpowiedzialny za interakcję z użytkownikiem
 - Komunikuje się z backendem poprzez API Gateway używając HTTP/REST
+
+### LoginComponent (Komponent logowania)
+- Odpowiada za logowanie użytkowników
 
 ### PizzaSelector (Komponent wyboru składników)
 - Pozwala użytkownikowi na wybór składników pizzy
@@ -225,6 +220,11 @@ flowchart TD
 - Pokazuje szczegółowe informacje o wybranej restauracji
 - Wyświetla menu i dostępne opcje
 
+### FavoritesComponent (Komponent ulubionych)
+- Zarządza ulubionymi pizzami użytkownika
+
+### SaveFavorite (Zapisz do ulubionych)
+- Umożliwia zapisanie pizzy do ulubionych
 
 ## Backend
 
@@ -256,11 +256,6 @@ flowchart TD
 - Agreguje i normalizuje wyniki
 - Implementuje strategie fallback i circuit breaker
 
-### Strategia obsługi błędów
-- Jeśli jeden z dostawców jest niedostępny, system kontynuuje działanie z pozostałymi
-- Implementacja circuit breaker zapobiega przeciążeniu niesprawnych API
-- Cachowanie pozwala na dostarczenie podstawowych danych nawet przy awarii dostawcy
-
 ### UserService (Serwis Użytkownika)
 - Zarządza logiką związaną z użytkownikami
 - Komunikuje się z bazą danych
@@ -268,14 +263,6 @@ flowchart TD
 ### FavoritesService (Serwis Ulubionych)
 - Zarządza logiką związaną z ulubionymi pizzami
 - Komunikuje się z bazą danych
-
-### IntegrationService (Serwis Integracji)
-- Zarządza komunikacją z różnymi dostawcami
-- Implementuje wzorzec fasady dla wszystkich integracji
-- Obsługuje równoległe zapytania do wielu dostawców
-- Agreguje i normalizuje wyniki
-- Implementuje strategie fallback i circuit breaker
-
 
 ## Data Layer
 
@@ -286,7 +273,6 @@ flowchart TD
 - Agreguje i normalizuje wyniki
 - Implementuje strategie fallback i circuit breaker
 
-
 ### Cache (Redis Cache)
 - Przechowuje popularne wyniki wyszukiwania
 - Przyspiesza odpowiedzi dla częstych zapytań
@@ -294,7 +280,6 @@ flowchart TD
 ### Database (Baza danych)
 - Przechowuje trwałe dane aplikacji
 - Obsługiwana przez PostgreSQL
-
 
 ### Cache Strategy (Strategia cachowania)
 #### L1 Cache (Cache aplikacyjny)
@@ -310,7 +295,7 @@ flowchart TD
 - Zaawansowane strategie invalidacji
 
 ## Monitoring
-  
+
 ### System monitoringu
 - Zbieranie metryk wydajnościowych
 - Monitorowanie SLA
@@ -335,7 +320,6 @@ flowchart TD
 - Regularne sprawdzanie stanu usług
 - Automatyczne wykrywanie problemów
 - Integracja z systemem alertów
-
 
 
 # Diagram przypadków użycia
